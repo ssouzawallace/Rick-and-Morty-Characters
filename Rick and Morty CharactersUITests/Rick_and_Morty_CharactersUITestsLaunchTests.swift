@@ -2,7 +2,7 @@
 //  Rick_and_Morty_CharactersUITestsLaunchTests.swift
 //  Rick and Morty CharactersUITests
 //
-//  Created by Wallace Souza Silva on 08/01/26.
+//  Created by Wallace Souza Silva
 //
 
 import XCTest
