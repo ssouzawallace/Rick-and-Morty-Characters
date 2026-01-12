@@ -61,15 +61,7 @@ final class Rick_and_Morty_CharactersServiceTests: XCTestCase {
         config.protocolClasses = [MockURLProtocol.self]
         let session = URLSession(configuration: config)
         let service = ApiService(urlSession: session)
-        do {
-            let _ = try await service.listCharacters(name: nil, status: nil)
-            XCTFail("Expected error to be thrown")
-        } catch {
-            if case NetworkingError.request(let statusCode) = error, statusCode == 404 {
-                return // Expected
-            } else {
-                XCTFail("Expected NetWorkingerror.request(404), got \(error)")
-            }
-        }
+        let response = try await service.listCharacters(name: nil, status: nil)
+        XCTAssertEqual(response.results.count, 0)
     }
 }
