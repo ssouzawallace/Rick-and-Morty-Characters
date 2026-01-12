@@ -18,30 +18,34 @@ struct CharactersList: View {
                 case .loading:
                     ProgressView()
                 case .loaded(let characters):
-                    List {
-                        ForEach(characters) { character in
-                            NavigationLink {
-                                CharacterDetails(id: character.id)
-                            } label: {
-                                CharactersListCell(character: character)
+                    if characters.isEmpty {
+                        Text("No Results")
+                    } else {
+                        List {
+                            ForEach(characters) { character in
+                                NavigationLink {
+                                    CharacterDetails(id: character.id)
+                                } label: {
+                                    CharactersListCell(character: character)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
+                            if viewModel.hasMoreData {
+                                HStack {
+                                    Spacer()
+                                    ProgressView()
+                                    Spacer()
+                                }
+                                .onAppear {
+                                    viewModel.fetchNextPage()
+                                }
+                            }
                         }
-                        if viewModel.hasMoreData {
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                Spacer()
-                            }
-                            .onAppear {
-                                viewModel.fetchNextPage()
-                            }
+                        .navigationLinkIndicatorVisibility(.hidden)
+                        .listStyle(.plain)
+                        .refreshable {
+                            viewModel.fetchInitialData()
                         }
-                    }
-                    .navigationLinkIndicatorVisibility(.hidden)
-                    .listStyle(.plain)
-                    .refreshable {
-                        viewModel.fetchInitialData()
                     }
                 }
             }

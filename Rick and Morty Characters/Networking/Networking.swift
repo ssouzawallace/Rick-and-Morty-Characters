@@ -16,9 +16,9 @@ struct ApiService: Service {
     
     // MARK: Properties
     
-    let baseUrl = "https://rickandmortyapi.com/api"
+    private let baseUrl = "https://rickandmortyapi.com/api"
     
-    let urlSession: URLSession
+    private let urlSession: URLSession
     
     // MARK: Initializer
     
@@ -52,9 +52,13 @@ struct ApiService: Service {
         let (data, response) = try await urlSession.data(from: url)
         
         if let response = response as? HTTPURLResponse, response.statusCode != 200 {
-            throw NetworkingError.request(response.statusCode)
+            if response.statusCode == 404 {
+                return GetAllCharactersResponse(info: GetAllCharactersResponse.Info(next: nil), results: [])
+            } else {
+                throw NetworkingError.request(response.statusCode)
+            }
         } else {
-            return try JSONDecoder().decode(GetAllCharactersResponse.self, from: data)
+            return try JSONDecoder().decode(GetAllCharactersResponse.self, from: data)            
         }
     }
     
