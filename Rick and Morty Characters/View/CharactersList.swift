@@ -22,24 +22,33 @@ struct CharactersList: View {
                         Text("No Results")
                     } else {
                         List {
-                            ForEach(characters) { character in
-                                NavigationLink {
-                                    CharacterDetails(id: character.id)
-                                } label: {
-                                    CharactersListCell(character: character)
+                            Section {
+                                ForEach(characters) { character in
+                                    NavigationLink {
+                                        CharacterDetails(id: character.id)
+                                    } label: {
+                                        CharactersListCell(character: character)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
+                                if viewModel.hasMoreData {
+                                    HStack {
+                                        Spacer()
+                                        ProgressView()
+                                        Spacer()
+                                    }
+                                    .onAppear {
+                                        viewModel.fetchNextPage()
+                                    }
+                                }
+                            } header: {
+                                Picker("Search by Status", selection: $viewModel.searchScope) {
+                                    ForEach(CharacterStatus.allCases, id: \.self) { status in
+                                        Text(status == .undefined ? "All" : status.presentationValue).tag(status)
+                                    }
+                                }
                             }
-                            if viewModel.hasMoreData {
-                                HStack {
-                                    Spacer()
-                                    ProgressView()
-                                    Spacer()
-                                }
-                                .onAppear {
-                                    viewModel.fetchNextPage()
-                                }
-                            }
+
                         }
                         .navigationLinkIndicatorVisibility(.hidden)
                         .listStyle(.plain)
@@ -51,11 +60,6 @@ struct CharactersList: View {
             }
             .navigationTitle(Text("Characters"))
             .searchable(text: $viewModel.searchText, prompt: Text("Search by name"))
-            .searchScopes($viewModel.searchScope, activation: .onSearchPresentation) {
-                ForEach(CharacterStatus.allCases, id: \.self) { status in
-                    Text(status == .undefined ? "All" : status.presentationValue).tag(status)
-                }
-            }
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("Retry") {
                     viewModel.errorMessage = nil
