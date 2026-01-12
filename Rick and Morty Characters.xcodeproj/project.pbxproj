@@ -27,6 +27,7 @@
 		BAE3C9832F106F5600EB3DE6 /* Rick and Morty Characters.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Rick and Morty Characters.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BAE3C9902F106F5800EB3DE6 /* Rick and Morty CharactersTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Rick and Morty CharactersTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BAE3C99A2F106F5800EB3DE6 /* Rick and Morty CharactersUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Rick and Morty CharactersUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BAE3C9D52F1099F600EB3DE6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +76,7 @@
 		BAE3C97A2F106F5600EB3DE6 = {
 			isa = PBXGroup;
 			children = (
+				BAE3C9D52F1099F600EB3DE6 /* README.md */,
 				BAE3C9852F106F5600EB3DE6 /* Rick and Morty Characters */,
 				BAE3C9932F106F5800EB3DE6 /* Rick and Morty CharactersTests */,
 				BAE3C99D2F106F5800EB3DE6 /* Rick and Morty CharactersUITests */,
