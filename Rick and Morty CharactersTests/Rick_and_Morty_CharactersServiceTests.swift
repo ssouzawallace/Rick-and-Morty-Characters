@@ -64,4 +64,27 @@ final class Rick_and_Morty_CharactersServiceTests: XCTestCase {
         let response = try await service.listCharacters(name: nil, status: nil)
         XCTAssertEqual(response.results.count, 0)
     }
+    
+    func testFailureHttp500() async throws {
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 500, httpVersion: nil, headerFields: nil)!
+            return (response, Data())
+        }
+        
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockURLProtocol.self]
+        let session = URLSession(configuration: config)
+        let service = ApiService(urlSession: session)
+        
+        do {
+            let _ = try await service.listCharacters(name: nil, status: nil)
+            XCTFail("Expected error to be thrown")
+        } catch {
+            if case NetworkingError.request(let statusCode) = error, statusCode == 500 {
+                return // Expected
+            } else {
+                XCTFail("Expected NetWorkingerror.request(500), got \(error)")
+            }
+        }
+    }
 }
