@@ -87,4 +87,67 @@ final class Rick_and_Morty_CharactersServiceTests: XCTestCase {
             }
         }
     }
+
+    // MARK: - getCharacterWith(id:)
+
+    func testGetCharacterSuccess() async throws {
+        guard let responseJSON = singleCharacterJson.data(using: .utf8) else {
+            XCTFail("Response JSON is not in the correct format")
+            return
+        }
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, responseJSON)
+        }
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockURLProtocol.self]
+        let session = URLSession(configuration: config)
+        let service = ApiService(urlSession: session)
+        let character = try await service.getCharacterWith(id: 1)
+        XCTAssertEqual(character.id, 1)
+        XCTAssertEqual(character.name, "Rick Sanchez")
+        XCTAssertEqual(character.status, .alive)
+    }
+
+    func testGetCharacterHttpError() async throws {
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 500, httpVersion: nil, headerFields: nil)!
+            return (response, Data())
+        }
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockURLProtocol.self]
+        let session = URLSession(configuration: config)
+        let service = ApiService(urlSession: session)
+        do {
+            let _ = try await service.getCharacterWith(id: 1)
+            XCTFail("Expected error to be thrown")
+        } catch {
+            if case NetworkingError.request(let statusCode) = error, statusCode == 500 {
+                return // Expected
+            } else {
+                XCTFail("Expected NetworkingError.request(500), got \(error)")
+            }
+        }
+    }
+
+    func testGetCharacterDecodingError() async throws {
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, Data())
+        }
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockURLProtocol.self]
+        let session = URLSession(configuration: config)
+        let service = ApiService(urlSession: session)
+        do {
+            let _ = try await service.getCharacterWith(id: 1)
+            XCTFail("Expected error to be thrown")
+        } catch {
+            if case DecodingError.dataCorrupted(_) = error {
+                return // Expected
+            } else {
+                XCTFail("Expected DecodingError.dataCorrupted, got \(error)")
+            }
+        }
+    }
 }
