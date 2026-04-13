@@ -97,7 +97,6 @@ final class Rick_and_Morty_CharactersDetailsViewModelTests: XCTestCase {
 
     func testRetryAfterErrorClearsAndLoads() async throws {
         // First attempt fails, retry succeeds
-        var callCount = 0
         let failingResult: Result<Character, Error> = .failure(NetworkingError.request(500))
         let successResult: Result<Character, Error> = .success(testCharacter)
 
@@ -116,10 +115,10 @@ final class Rick_and_Morty_CharactersDetailsViewModelTests: XCTestCase {
             }
 
             func listCharacters(page: Int, name: String?, status: String?) async throws -> GetAllCharactersResponse {
-                try GetAllCharactersResponse(
+                GetAllCharactersResponse(
                     info: GetAllCharactersResponse.Info(next: nil),
                     results: []
-                ) as GetAllCharactersResponse
+                )
             }
         }
 
