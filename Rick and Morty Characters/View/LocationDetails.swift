@@ -32,11 +32,7 @@ struct LocationDetails: View {
                         CharacterDetailsFormCell(key: "Residents", value: location.residents.count.description)
                         switch viewModel.residentsStatus {
                         case .idle:
-                            if !location.residents.isEmpty {
-                                Button("Load Residents") {
-                                    viewModel.fetchResidents(urls: location.residents)
-                                }
-                            }
+                            EmptyView()
                         case .loading:
                             HStack {
                                 Spacer()

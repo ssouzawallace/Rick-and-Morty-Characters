@@ -32,11 +32,7 @@ struct EpisodeDetails: View {
                         CharacterDetailsFormCell(key: "Characters", value: episode.characters.count.description)
                         switch viewModel.charactersStatus {
                         case .idle:
-                            if !episode.characters.isEmpty {
-                                Button("Load Characters") {
-                                    viewModel.fetchCharacters(urls: episode.characters)
-                                }
-                            }
+                            EmptyView()
                         case .loading:
                             HStack {
                                 Spacer()
