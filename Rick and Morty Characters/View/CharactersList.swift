@@ -13,52 +13,75 @@ struct CharactersList: View {
     
     var body: some View {
         NavigationStack {
-            Group {
-                switch viewModel.status {
-                case .loading:
-                    ProgressView()
-                case .loaded(let characters):
-                    if characters.isEmpty {
-                        Text("No Results")
-                    } else {
-                        List {
-                            Section {
-                                ForEach(characters) { character in
-                                    NavigationLink {
-                                        CharacterDetails(id: character.id)
-                                    } label: {
-                                        CharactersListCell(character: character)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                                if viewModel.hasMoreData {
-                                    HStack {
-                                        Spacer()
-                                        ProgressView()
-                                        Spacer()
-                                    }
-                                    .onAppear {
-                                        viewModel.fetchNextPage()
-                                    }
-                                }
-                            } header: {
-                                Picker("Search by Status", selection: $viewModel.searchScope) {
-                                    ForEach(CharacterStatus.allCases, id: \.self) { status in
-                                        Text(status == .undefined ? "All" : status.presentationValue).tag(status)
-                                    }
-                                }
-                            }
+            ZStack {
+                GalacticTheme.spaceBackground.ignoresSafeArea()
 
-                        }
-                        .navigationLinkIndicatorVisibility(.hidden)
-                        .listStyle(.plain)
-                        .refreshable {
-                            viewModel.fetchInitialData()
+                Group {
+                    switch viewModel.status {
+                    case .loading:
+                        GalacticLoadingView()
+
+                    case .loaded(let characters):
+                        if characters.isEmpty {
+                            VStack(spacing: 16) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 44))
+                                    .foregroundStyle(GalacticTheme.portalGreen)
+                                Text("No Results")
+                                    .font(.title3)
+                                    .foregroundStyle(GalacticTheme.textSecondary)
+                            }
+                        } else {
+                            List {
+                                Section {
+                                    ForEach(characters) { character in
+                                        NavigationLink {
+                                            CharacterDetails(id: character.id)
+                                        } label: {
+                                            CharactersListCell(character: character)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    if viewModel.hasMoreData {
+                                        HStack {
+                                            Spacer()
+                                            GalacticInlineSpinner(size: 28, lineWidth: 3)
+                                                .padding(.vertical, 12)
+                                            Spacer()
+                                        }
+                                        .listRowBackground(GalacticTheme.spaceBackground)
+                                        .listRowSeparator(.hidden)
+                                        .onAppear {
+                                            viewModel.fetchNextPage()
+                                        }
+                                    }
+                                } header: {
+                                    Picker("Search by Status", selection: $viewModel.searchScope) {
+                                        ForEach(CharacterStatus.allCases, id: \.self) { status in
+                                            Text(status == .undefined ? "All" : status.presentationValue)
+                                                .tag(status)
+                                        }
+                                    }
+                                    .pickerStyle(.segmented)
+                                    .padding(.vertical, 6)
+                                }
+                                .listRowBackground(GalacticTheme.spaceBackground)
+                            }
+                            .scrollContentBackground(.hidden)
+                            .background(GalacticTheme.spaceBackground)
+                            .listStyle(.plain)
+                            .navigationLinkIndicatorVisibility(.hidden)
+                            .refreshable {
+                                viewModel.fetchInitialData()
+                            }
                         }
                     }
                 }
             }
             .navigationTitle(Text("Characters"))
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(GalacticTheme.sectionHeader, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .searchable(text: $viewModel.searchText, prompt: Text("Search by name"))
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("Retry") {
