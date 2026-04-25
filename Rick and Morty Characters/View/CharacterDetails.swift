@@ -23,15 +23,32 @@ struct CharacterDetails: View {
             case .loaded(character: let character):
                 List {
                     Section {
-                        AsyncImage(url: URL(string: character.image)) { image in
-                            image.frame(maxWidth: .infinity, alignment: .center)
-                        } placeholder: {
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                Spacer()
+                        CachedAsyncImage(
+                            url: URL(string: character.image),
+                            content: { image in
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            },
+                            placeholder: {
+                                HStack {
+                                    Spacer()
+                                    ProgressView()
+                                    Spacer()
+                                }
+                            },
+                            errorView: {
+                                HStack {
+                                    Spacer()
+                                    Image(systemName: "photo.slash")
+                                        .foregroundStyle(.secondary)
+                                    Text("No Image")
+                                        .foregroundStyle(.secondary)
+                                    Spacer()
+                                }
                             }
-                        }
+                        )
                     }
                     
                     Section {
