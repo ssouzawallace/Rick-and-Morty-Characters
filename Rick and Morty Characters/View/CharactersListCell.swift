@@ -34,15 +34,18 @@ struct CharactersListCell: View {
         ZStack(alignment: .bottom) {
             
             ZStack {
-                AsyncImage(url: URL(string: character.image)) { phase in
-                    if let _ = phase.error {
-                        NoImageView(bottomOverlayHeight: $bottomOverlayHeight)
-                    } else if let image = phase.image {
+                CachedAsyncImage(
+                    url: URL(string: character.image),
+                    content: { image in
                         image.resizable()
-                    } else {
+                    },
+                    placeholder: {
                         ProgressView()
+                    },
+                    errorView: {
+                        NoImageView(bottomOverlayHeight: $bottomOverlayHeight)
                     }
-                }
+                )
             }
             .aspectRatio(1, contentMode: .fit)
             
