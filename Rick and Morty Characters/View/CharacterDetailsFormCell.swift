@@ -14,7 +14,7 @@ struct CharacterDetailsFormCell: View {
     var body: some View {
         HStack {
             Text(key)
-                .font(.system(.subheadline, design: .monospaced, weight: .bold))
+                .font(.system(.subheadline, weight: .bold))
                 .foregroundStyle(GalacticTheme.keyText)
             Spacer()
             Text(value)

@@ -31,7 +31,7 @@ struct CharactersListCell: View {
     let character: Character
     
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 12) {
 
             // Character portrait
             ZStack {
@@ -54,11 +54,12 @@ struct CharactersListCell: View {
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(GalacticTheme.portalGreen.opacity(0.4), lineWidth: 1)
             )
+            .shadow(color: GalacticTheme.portalGreen.opacity(0.2), radius: 6, x: 0, y: 3)
 
-            // Info panel
+            // Info panel – floating card detached from the portrait
             VStack(alignment: .leading, spacing: 6) {
                 Text(character.name)
-                    .font(.system(.headline, design: .rounded, weight: .bold))
+                    .font(.system(.headline, weight: .bold))
                     .foregroundStyle(GalacticTheme.textPrimary)
                     .lineLimit(2)
 
@@ -69,15 +70,23 @@ struct CharactersListCell: View {
                         .font(.caption2)
                         .foregroundStyle(GalacticTheme.portalTeal)
                     Text(character.species)
-                        .font(.caption)
+                        .font(.system(.caption, weight: .medium))
                         .foregroundStyle(GalacticTheme.textSecondary)
                 }
             }
-            .padding(.horizontal, 12)
+            .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .background(GalacticTheme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(GalacticTheme.portalGreen.opacity(0.25), lineWidth: 1)
+            )
+            .shadow(color: GalacticTheme.portalGreen.opacity(0.12), radius: 8, x: 0, y: 4)
         }
         .padding(10)
-        .galacticCard()
+        .background(GalacticTheme.spaceBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
         .listRowBackground(GalacticTheme.spaceBackground)
         .listRowSeparator(.hidden)
         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
