@@ -71,7 +71,7 @@ struct CharacterDetails: View {
 
                             HStack {
                                 Text("Status")
-                                    .font(.system(.subheadline, design: .monospaced, weight: .bold))
+                                    .font(.system(.subheadline, weight: .bold))
                                     .foregroundStyle(GalacticTheme.keyText)
                                 Spacer()
                                 StatusBadge(status: character.status)
@@ -79,7 +79,7 @@ struct CharacterDetails: View {
                             .listRowBackground(GalacticTheme.cardBackground)
                         } header: {
                             Text("Identity")
-                                .font(.system(.caption, design: .monospaced, weight: .semibold))
+                                .font(.system(.caption, weight: .semibold))
                                 .foregroundStyle(GalacticTheme.portalTeal)
                                 .textCase(nil)
                         }
@@ -88,7 +88,7 @@ struct CharacterDetails: View {
                         Section {
                             HStack {
                                 Text("Total Episodes")
-                                    .font(.system(.subheadline, design: .monospaced, weight: .bold))
+                                    .font(.system(.subheadline, weight: .bold))
                                     .foregroundStyle(GalacticTheme.keyText)
                                 Spacer()
                                 Text(character.episode.count.description)
@@ -103,14 +103,14 @@ struct CharacterDetails: View {
                                         .fill(GalacticTheme.portalGreen.opacity(0.6))
                                         .frame(width: 5, height: 5)
                                     Text(episode.lastPathComponent)
-                                        .font(.system(.caption, design: .monospaced))
+                                        .font(.system(.caption))
                                         .foregroundStyle(GalacticTheme.textSecondary)
                                 }
                                 .listRowBackground(GalacticTheme.cardBackground)
                             }
                         } header: {
                             Text("Episodes")
-                                .font(.system(.caption, design: .monospaced, weight: .semibold))
+                                .font(.system(.caption, weight: .semibold))
                                 .foregroundStyle(GalacticTheme.portalTeal)
                                 .textCase(nil)
                         }
