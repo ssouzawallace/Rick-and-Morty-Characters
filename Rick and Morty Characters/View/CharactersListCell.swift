@@ -43,7 +43,7 @@ struct CharactersListCell: View {
                     } else {
                         ZStack {
                             GalacticTheme.cardBackground
-                            GalacticLoadingSpinner()
+                            GalacticInlineSpinner()
                         }
                     }
                 }
@@ -81,26 +81,6 @@ struct CharactersListCell: View {
         .listRowBackground(GalacticTheme.spaceBackground)
         .listRowSeparator(.hidden)
         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-    }
-}
-
-// Small inline spinner used inside cells
-private struct GalacticLoadingSpinner: View {
-    @State private var rotating = false
-
-    var body: some View {
-        Circle()
-            .stroke(
-                AngularGradient(
-                    colors: [GalacticTheme.portalGreen, GalacticTheme.portalTeal, .clear],
-                    center: .center
-                ),
-                lineWidth: 3
-            )
-            .frame(width: 28, height: 28)
-            .rotationEffect(.degrees(rotating ? 360 : 0))
-            .animation(.linear(duration: 0.9).repeatForever(autoreverses: false), value: rotating)
-            .onAppear { rotating = true }
     }
 }
 

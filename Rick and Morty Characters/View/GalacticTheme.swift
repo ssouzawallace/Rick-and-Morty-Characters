@@ -61,7 +61,7 @@ extension View {
     }
 }
 
-// MARK: - Galactic loading view
+// MARK: - Galactic loading view (full-screen)
 
 struct GalacticLoadingView: View {
 
@@ -72,38 +72,37 @@ struct GalacticLoadingView: View {
             GalacticTheme.spaceBackground.ignoresSafeArea()
 
             VStack(spacing: 20) {
-                ZStack {
-                    Circle()
-                        .stroke(
-                            AngularGradient(
-                                gradient: Gradient(colors: [
-                                    GalacticTheme.portalGreen,
-                                    GalacticTheme.portalTeal,
-                                    GalacticTheme.galacticPurple,
-                                    GalacticTheme.portalGreen
-                                ]),
-                                center: .center
-                            ),
-                            lineWidth: 4
-                        )
-                        .frame(width: 60, height: 60)
-                        .rotationEffect(.degrees(rotating ? 360 : 0))
-                        .animation(
-                            .linear(duration: 1.2).repeatForever(autoreverses: false),
-                            value: rotating
-                        )
-
-                    Circle()
-                        .fill(GalacticTheme.portalGreen.opacity(0.15))
-                        .frame(width: 44, height: 44)
-                }
-                .onAppear { rotating = true }
+                GalacticInlineSpinner(size: 60, lineWidth: 4)
 
                 Text("Loading…")
                     .font(.system(.subheadline, design: .monospaced))
                     .foregroundStyle(GalacticTheme.textSecondary)
             }
         }
+    }
+}
+
+// MARK: - Galactic inline spinner (for list rows / placeholders)
+
+struct GalacticInlineSpinner: View {
+    var size: CGFloat = 28
+    var lineWidth: CGFloat = 3
+
+    @State private var rotating = false
+
+    var body: some View {
+        Circle()
+            .stroke(
+                AngularGradient(
+                    colors: [GalacticTheme.portalGreen, GalacticTheme.portalTeal, .clear],
+                    center: .center
+                ),
+                lineWidth: lineWidth
+            )
+            .frame(width: size, height: size)
+            .rotationEffect(.degrees(rotating ? 360 : 0))
+            .animation(.linear(duration: 0.9).repeatForever(autoreverses: false), value: rotating)
+            .onAppear { rotating = true }
     }
 }
 

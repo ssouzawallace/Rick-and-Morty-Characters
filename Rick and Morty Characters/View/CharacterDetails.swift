@@ -51,8 +51,8 @@ struct CharacterDetails: View {
                                 } else {
                                     HStack {
                                         Spacer()
-                                        GalacticLoadingView()
-                                            .frame(height: 120)
+                                        GalacticInlineSpinner(size: 40, lineWidth: 3)
+                                            .padding(.vertical, 40)
                                         Spacer()
                                     }
                                 }
