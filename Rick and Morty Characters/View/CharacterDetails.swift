@@ -102,7 +102,7 @@ struct CharacterDetails: View {
                                     Circle()
                                         .fill(GalacticTheme.portalGreen.opacity(0.6))
                                         .frame(width: 5, height: 5)
-                                    Text(episode.components(separatedBy: "/").last ?? episode)
+                                    Text(episode.lastPathComponent)
                                         .font(.system(.caption, design: .monospaced))
                                         .foregroundStyle(GalacticTheme.textSecondary)
                                 }
