@@ -10,6 +10,8 @@ import Foundation
 protocol Service {
     func getCharacterWith(id: Int) async throws  -> Character
     func listCharacters(page: Int, name: String?, status: String?) async throws -> GetAllCharactersResponse
+    func listEpisodes(page: Int, name: String?) async throws -> GetAllEpisodesResponse
+    func listLocations(page: Int, name: String?) async throws -> GetAllLocationsResponse
 }
 
 struct ApiService: Service {
@@ -62,6 +64,38 @@ struct ApiService: Service {
         }
     }
     
+    func listEpisodes(page: Int = 1, name: String?) async throws -> GetAllEpisodesResponse {
+        let url = try paginatedUrlWith(endpoint: "/episode", page: page, name: name)
+
+        let (data, response) = try await urlSession.data(from: url)
+
+        if let response = response as? HTTPURLResponse, response.statusCode != 200 {
+            if response.statusCode == 404 {
+                return GetAllEpisodesResponse(info: GetAllEpisodesResponse.Info(next: nil), results: [])
+            } else {
+                throw NetworkingError.request(response.statusCode)
+            }
+        } else {
+            return try JSONDecoder().decode(GetAllEpisodesResponse.self, from: data)
+        }
+    }
+
+    func listLocations(page: Int = 1, name: String?) async throws -> GetAllLocationsResponse {
+        let url = try paginatedUrlWith(endpoint: "/location", page: page, name: name)
+
+        let (data, response) = try await urlSession.data(from: url)
+
+        if let response = response as? HTTPURLResponse, response.statusCode != 200 {
+            if response.statusCode == 404 {
+                return GetAllLocationsResponse(info: GetAllLocationsResponse.Info(next: nil), results: [])
+            } else {
+                throw NetworkingError.request(response.statusCode)
+            }
+        } else {
+            return try JSONDecoder().decode(GetAllLocationsResponse.self, from: data)
+        }
+    }
+
     private func characterUrlWith(page: Int = 1, name: String?, status: String?) throws -> URL {
         guard var urlComponents = URLComponents(string: baseUrl + "/character") else {
             throw NetworkingError.badUrl
@@ -85,6 +119,28 @@ struct ApiService: Service {
             throw NetworkingError.badUrlComponents
         }
         
+        return url
+    }
+
+    private func paginatedUrlWith(endpoint: String, page: Int, name: String?) throws -> URL {
+        guard var urlComponents = URLComponents(string: baseUrl + endpoint) else {
+            throw NetworkingError.badUrl
+        }
+
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "page", value: String(page))
+        ]
+
+        if let name {
+            queryItems.append(URLQueryItem(name: "name", value: name))
+        }
+
+        urlComponents.queryItems = queryItems
+
+        guard let url = urlComponents.url else {
+            throw NetworkingError.badUrlComponents
+        }
+
         return url
     }
 }
