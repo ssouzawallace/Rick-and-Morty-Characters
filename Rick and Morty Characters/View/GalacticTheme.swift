@@ -65,8 +65,6 @@ extension View {
 
 struct GalacticLoadingView: View {
 
-    @State private var rotating = false
-
     var body: some View {
         ZStack {
             GalacticTheme.spaceBackground.ignoresSafeArea()

@@ -36,10 +36,10 @@ struct CharactersListCell: View {
             // Character portrait
             ZStack {
                 AsyncImage(url: URL(string: character.image)) { phase in
-                    if phase.error != nil {
-                        NoImageView()
-                    } else if let image = phase.image {
+                    if let image = phase.image {
                         image.resizable().scaledToFill()
+                    } else if phase.error != nil {
+                        NoImageView()
                     } else {
                         ZStack {
                             GalacticTheme.cardBackground
