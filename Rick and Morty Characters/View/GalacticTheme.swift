@@ -73,7 +73,7 @@ struct GalacticLoadingView: View {
                 GalacticInlineSpinner(size: 60, lineWidth: 4)
 
                 Text("Loading…")
-                    .font(.system(.subheadline, design: .monospaced))
+                    .font(.system(.subheadline))
                     .foregroundStyle(GalacticTheme.textSecondary)
             }
         }
