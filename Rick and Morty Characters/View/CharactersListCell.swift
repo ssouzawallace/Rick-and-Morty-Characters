@@ -10,67 +10,97 @@ import SwiftUI
 struct CharactersListCell: View {
     
     private struct NoImageView: View {
-        
-        @Binding var bottomOverlayHeight: CGFloat
-        
+
         var body: some View {
             ZStack {
                 Rectangle()
-                    .fill(.gray)
+                    .fill(GalacticTheme.cardBackground)
                 
-                Text("No Image")
-                    .alignmentGuide(VerticalAlignment.center) { _ in
-                        bottomOverlayHeight / 2
-                    }
+                VStack(spacing: 6) {
+                    Image(systemName: "photo.slash")
+                        .font(.system(size: 32))
+                        .foregroundStyle(GalacticTheme.textSecondary)
+                    Text("No Image")
+                        .font(.caption)
+                        .foregroundStyle(GalacticTheme.textSecondary)
+                }
             }
         }
     }
     
-    @State private var bottomOverlayHeight: CGFloat = 0
-    
     let character: Character
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            
+        HStack(spacing: 0) {
+
+            // Character portrait
             ZStack {
                 AsyncImage(url: URL(string: character.image)) { phase in
-                    if let _ = phase.error {
-                        NoImageView(bottomOverlayHeight: $bottomOverlayHeight)
+                    if phase.error != nil {
+                        NoImageView()
                     } else if let image = phase.image {
-                        image.resizable()
+                        image.resizable().scaledToFill()
                     } else {
-                        ProgressView()
+                        ZStack {
+                            GalacticTheme.cardBackground
+                            GalacticLoadingSpinner()
+                        }
                     }
                 }
             }
-            .aspectRatio(1, contentMode: .fit)
-            
-            VStack(alignment: .leading) {
+            .frame(width: 100, height: 100)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(GalacticTheme.portalGreen.opacity(0.4), lineWidth: 1)
+            )
+
+            // Info panel
+            VStack(alignment: .leading, spacing: 6) {
                 Text(character.name)
-                    .bold()
-                Divider()
-                CharacterDetailsFormCell(
-                    key: "Status",
-                    value: character.status.presentationValue
-                )
-                CharacterDetailsFormCell(
-                    key: "Species",
-                    value: character.species
-                )
-            }
-            .padding()
-            .background(.white.opacity(0.8))
-            .background {
-                GeometryReader { proxy in
-                    Color.clear
-                        .onAppear {
-                            bottomOverlayHeight = proxy.size.height
-                        }
+                    .font(.system(.headline, design: .rounded, weight: .bold))
+                    .foregroundStyle(GalacticTheme.textPrimary)
+                    .lineLimit(2)
+
+                StatusBadge(status: character.status)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "atom")
+                        .font(.caption2)
+                        .foregroundStyle(GalacticTheme.portalTeal)
+                    Text(character.species)
+                        .font(.caption)
+                        .foregroundStyle(GalacticTheme.textSecondary)
                 }
             }
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding()
+        .padding(10)
+        .galacticCard()
+        .listRowBackground(GalacticTheme.spaceBackground)
+        .listRowSeparator(.hidden)
+        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+    }
+}
+
+// Small inline spinner used inside cells
+private struct GalacticLoadingSpinner: View {
+    @State private var rotating = false
+
+    var body: some View {
+        Circle()
+            .stroke(
+                AngularGradient(
+                    colors: [GalacticTheme.portalGreen, GalacticTheme.portalTeal, .clear],
+                    center: .center
+                ),
+                lineWidth: 3
+            )
+            .frame(width: 28, height: 28)
+            .rotationEffect(.degrees(rotating ? 360 : 0))
+            .animation(.linear(duration: 0.9).repeatForever(autoreverses: false), value: rotating)
+            .onAppear { rotating = true }
     }
 }
 
