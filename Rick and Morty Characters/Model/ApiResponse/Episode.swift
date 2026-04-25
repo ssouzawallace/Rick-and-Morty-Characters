@@ -40,6 +40,6 @@ extension Episode {
         self.url = try container.decode(String.self, forKey: .url)
 
         let createdString = try container.decode(String.self, forKey: .created)
-        self.created = ISO8601DateFormatter().date(from: createdString) ?? nil
+        self.created = ISO8601DateFormatter().date(from: createdString)
     }
 }
