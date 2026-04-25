@@ -14,10 +14,15 @@ struct CharacterDetailsFormCell: View {
     var body: some View {
         HStack {
             Text(key)
-                .bold()
+                .font(.system(.subheadline, design: .monospaced, weight: .bold))
+                .foregroundStyle(GalacticTheme.keyText)
             Spacer()
             Text(value)
+                .font(.subheadline)
+                .foregroundStyle(GalacticTheme.textSecondary)
+                .multilineTextAlignment(.trailing)
         }
+        .listRowBackground(GalacticTheme.cardBackground)
     }
 }
 
