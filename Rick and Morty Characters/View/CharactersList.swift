@@ -45,8 +45,8 @@ struct CharactersList: View {
                                     if viewModel.hasMoreData {
                                         HStack {
                                             Spacer()
-                                            GalacticLoadingView()
-                                                .frame(height: 80)
+                                            GalacticInlineSpinner(size: 28, lineWidth: 3)
+                                                .padding(.vertical, 12)
                                             Spacer()
                                         }
                                         .listRowBackground(GalacticTheme.spaceBackground)
