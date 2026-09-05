@@ -1,0 +1,47 @@
+name: iOS
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The runner image changes its simulator line-up over time, so pick
+      # whichever iPhone is actually installed rather than pinning a name that
+      # quietly disappears.
+      - name: Select an iPhone simulator
+        id: simulator
+        run: |
+          set -euo pipefail
+          name=$(xcrun simctl list devices available --json | python3 -c "
+          import json, sys
+          devices = json.load(sys.stdin)['devices']
+          iphones = [d['name'] for runtime in devices for d in devices[runtime] if d['name'].startswith('iPhone')]
+          if not iphones:
+              sys.exit('No iPhone simulator available on this runner')
+          print(iphones[0])
+          ")
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "Using $name"
+
+      - name: Build and run unit tests
+        run: |
+          xcodebuild test \
+            -project "Rick and Morty Characters.xcodeproj" \
+            -scheme "Rick and Morty Characters" \
+            -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
+            -only-testing:"Rick and Morty CharactersTests" \
+            CODE_SIGNING_ALLOWED=NO
