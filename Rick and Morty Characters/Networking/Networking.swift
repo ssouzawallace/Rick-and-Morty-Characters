@@ -191,48 +191,58 @@ struct ApiService: Service {
 
     // MARK: Multiple Characters by URLs
 
-    /// A location can list dozens of residents. Without a cap, each one becomes a
-    /// simultaneous request: battery and network pressure, and a good way to get
-    /// throttled by the API.
-    private static let maxConcurrentCharacterRequests = 5
+    /// The API accepts several ids in one path — `/character/1,2,3` — and returns
+    /// them together. A location like the Citadel of Ricks lists 101 residents;
+    /// requesting those one at a time got the app rate limited (HTTP 429), which
+    /// surfaced as an error alert on every busy location and episode.
+    ///
+    /// 101 ids fit comfortably in one URL, but chunk anyway so an unusually long
+    /// list cannot produce an over-long path.
+    private static let charactersPerRequest = 100
 
     func getCharactersByURLs(_ urls: [String]) async throws -> [Character] {
-        try await withThrowingTaskGroup(of: Character.self) { group in
-            var characters: [Character] = []
-            characters.reserveCapacity(urls.count)
+        let ids = try urls.map(Self.characterId(fromURL:))
 
-            var next = 0
+        guard !ids.isEmpty else { return [] }
 
-            // Prime the group, then top it up as each request finishes, so no more
-            // than maxConcurrentCharacterRequests are ever in flight.
-            while next < min(Self.maxConcurrentCharacterRequests, urls.count) {
-                let urlString = urls[next]
-                group.addTask { try await self.character(atURLString: urlString) }
-                next += 1
-            }
+        var characters: [Character] = []
+        characters.reserveCapacity(ids.count)
 
-            while let character = try await group.next() {
-                characters.append(character)
-
-                if next < urls.count {
-                    let urlString = urls[next]
-                    group.addTask { try await self.character(atURLString: urlString) }
-                    next += 1
-                }
-            }
-
-            return characters.sorted { $0.id < $1.id }
+        for start in stride(from: 0, to: ids.count, by: Self.charactersPerRequest) {
+            let batch = Array(ids[start ..< min(start + Self.charactersPerRequest, ids.count)])
+            characters.append(contentsOf: try await fetchCharacters(withIds: batch))
         }
+
+        return characters.sorted { $0.id < $1.id }
     }
 
-    private func character(atURLString urlString: String) async throws -> Character {
-        guard let url = URL(string: urlString) else {
+    /// Pulls the trailing id out of a character URL such as
+    /// `https://rickandmortyapi.com/api/character/42`.
+    private static func characterId(fromURL urlString: String) throws -> String {
+        guard let id = urlString.split(separator: "/").last.map(String.init),
+              !id.isEmpty,
+              id.allSatisfy(\.isNumber) else {
             throw NetworkingError.badUrl
         }
+        return id
+    }
+
+    private func fetchCharacters(withIds ids: [String]) async throws -> [Character] {
+        guard let url = URL(string: baseUrl + "/character/" + ids.joined(separator: ",")) else {
+            throw NetworkingError.badUrl
+        }
+
         let (data, response) = try await urlSession.data(from: url)
+
         if let response = response as? HTTPURLResponse, response.statusCode != 200 {
             throw NetworkingError.request(response.statusCode)
         }
-        return try JSONDecoder().decode(Character.self, from: data)
+
+        // One id returns a single object; two or more return an array.
+        if ids.count == 1 {
+            return [try JSONDecoder().decode(Character.self, from: data)]
+        }
+
+        return try JSONDecoder().decode([Character].self, from: data)
     }
 }
