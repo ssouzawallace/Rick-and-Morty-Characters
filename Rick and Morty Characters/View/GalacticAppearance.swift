@@ -57,7 +57,9 @@ enum GalacticAppearance {
     /// effectively invisible against the galactic background.
     private static func applySegmentedControl() {
         let control = UISegmentedControl.appearance()
-        control.backgroundColor = UIColor(GalacticTheme.cardBackground)
+        // UIAppearance is applied once at launch, so this cannot track the
+        // chosen background. A translucent fill sits correctly on all eight.
+        control.backgroundColor = UIColor(white: 1, alpha: 0.10)
         control.selectedSegmentTintColor = UIColor(GalacticTheme.portalGreen)
         control.setTitleTextAttributes(
             [

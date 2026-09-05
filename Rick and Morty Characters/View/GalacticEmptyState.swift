@@ -30,6 +30,8 @@ struct GalacticPagingFooter: View {
 
     let onAppear: () -> Void
 
+    @GalacticBackgroundPreference private var background
+
     var body: some View {
         HStack {
             Spacer()
@@ -37,7 +39,7 @@ struct GalacticPagingFooter: View {
                 .padding(.vertical, 12)
             Spacer()
         }
-        .listRowBackground(GalacticTheme.spaceBackground)
+        .listRowBackground(background.color)
         .listRowSeparator(.hidden)
         .onAppear(perform: onAppear)
     }
@@ -45,14 +47,26 @@ struct GalacticPagingFooter: View {
 
 // MARK: - Screen chrome
 
+/// A `ViewModifier` rather than a plain `View` extension so it can hold the
+/// `@AppStorage` preference and redraw when the viewer picks a new background.
+private struct GalacticListModifier: ViewModifier {
+
+    @GalacticBackgroundPreference private var background
+
+    func body(content: Content) -> some View {
+        content
+            .scrollContentBackground(.hidden)
+            .background(background.color)
+    }
+}
+
 extension View {
 
-    /// The galactic list treatment: hide the system list background, paint the
-    /// galactic one, and leave the navigation bar transparent so it shows through.
+    /// Hides the system list background and paints the chosen one. The list
+    /// style stays with the caller: plain for the tab lists, inset-grouped for
+    /// the details forms.
     func galacticList() -> some View {
-        self
-            .scrollContentBackground(.hidden)
-            .background(GalacticTheme.spaceBackground)
+        modifier(GalacticListModifier())
     }
 
     /// A transparent navigation bar over the galactic background.

@@ -10,7 +10,9 @@ import SwiftUI
 struct CharacterDetailsFormCell: View {
     let key: String
     let value: String
-    
+
+    @GalacticBackgroundPreference private var background
+
     var body: some View {
         HStack {
             Text(key)
@@ -22,7 +24,7 @@ struct CharacterDetailsFormCell: View {
                 .foregroundStyle(GalacticTheme.textSecondary)
                 .multilineTextAlignment(.trailing)
         }
-        .listRowBackground(GalacticTheme.cardBackground)
+        .listRowBackground(background.cardColor)
     }
 }
 

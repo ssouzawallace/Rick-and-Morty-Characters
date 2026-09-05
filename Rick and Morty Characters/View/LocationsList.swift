@@ -11,10 +11,12 @@ struct LocationsList: View {
 
     @ObservedObject var viewModel = LocationsListViewModel()
 
+    @GalacticBackgroundPreference private var background
+
     var body: some View {
         NavigationStack {
             ZStack {
-                GalacticTheme.spaceBackground.ignoresSafeArea()
+                background.color.ignoresSafeArea()
 
                 Group {
                     switch viewModel.status {
@@ -54,11 +56,11 @@ struct LocationsList: View {
             }
             .navigationTitle(Text("Locations"))
             .galacticNavigationBar()
+        .galacticSettingsToolbar()
             .searchable(text: $viewModel.searchText, prompt: Text("Search by name"))
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("Retry") {
-                    viewModel.errorMessage = nil
-                    viewModel.fetchInitialData()
+                    viewModel.retry()
                 }
             } message: {
                 Text(viewModel.errorMessage ?? "")

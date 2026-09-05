@@ -49,9 +49,11 @@ struct GalacticIconTile: View {
 
     let systemImage: String
 
+    @GalacticBackgroundPreference private var background
+
     var body: some View {
         GalacticTile {
-            GalacticTheme.cardBackground
+            background.cardColor
 
             Image(systemName: systemImage)
                 .font(.system(size: 38))
@@ -69,13 +71,16 @@ struct GalacticInfoCard<Content: View>: View {
 
     @ViewBuilder let content: () -> Content
 
+    @GalacticBackgroundPreference private var background
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             content()
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(GalacticTheme.cardBackground)
+        // The screen background: the card is defined by its border, not by a fill.
+        .background(background.color)
         .clipShape(RoundedRectangle(cornerRadius: GalacticRow.cornerRadius))
         .overlay(
             RoundedRectangle(cornerRadius: GalacticRow.cornerRadius)
@@ -113,9 +118,15 @@ struct GalacticRowLayout<Leading: View, Trailing: View>: View {
 /// showing between cards.
 private struct GalacticListRowModifier: ViewModifier {
 
+    /// True for rows inside a grouped section, which is a raised panel; false
+    /// for rows that sit directly on the page.
+    let onPanel: Bool
+
+    @GalacticBackgroundPreference private var background
+
     func body(content: Content) -> some View {
         content
-            .listRowBackground(GalacticTheme.spaceBackground)
+            .listRowBackground(onPanel ? background.cardColor : background.color)
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
     }
@@ -125,8 +136,11 @@ extension View {
 
     /// The galactic list-row treatment: themed background, no separator, and the
     /// insets the cards are designed around.
-    func galacticListRow() -> some View {
-        modifier(GalacticListRowModifier())
+    ///
+    /// Pass `onPanel: true` for rows inside a grouped section, so the row fills
+    /// with the section's card colour and the info card reads as an inset on it.
+    func galacticListRow(onPanel: Bool = false) -> some View {
+        modifier(GalacticListRowModifier(onPanel: onPanel))
     }
 }
 
