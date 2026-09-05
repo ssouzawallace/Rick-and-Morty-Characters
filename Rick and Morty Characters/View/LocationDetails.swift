@@ -89,7 +89,6 @@ struct LocationDetails: View {
         .galacticSettingsToolbar()
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("Retry") {
-                viewModel.errorMessage = nil
                 viewModel.retry()
             }
         } message: {

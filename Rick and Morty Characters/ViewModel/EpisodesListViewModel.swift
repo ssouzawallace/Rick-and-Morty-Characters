@@ -42,6 +42,10 @@ class EpisodesListViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var fetchTask: Task<Void, Never>?
 
+    /// The page whose request failed, so Retry can re-issue just that page
+    /// instead of discarding the rows already on screen.
+    private var failedPage: Int?
+
     init(service: Service = ApiService()) {
         self.service = service
         fetchInitialData()
@@ -59,14 +63,32 @@ class EpisodesListViewModel: ObservableObject {
     func fetchInitialData() {
         status = .loading
         errorMessage = nil
+        failedPage = nil
         hasMoreData = true
         page = 1
         fetchEpisodes(page: currentPage)
     }
 
     func fetchNextPage() {
+        // The paging footer stays on screen behind the alert; without this its
+        // onAppear would keep incrementing the page and skip whole pages.
+        guard errorMessage == nil else { return }
+
         page += 1
         fetchEpisodes(page: currentPage)
+    }
+
+    /// Re-issues only the request that failed. A failed second page must not
+    /// throw away the first one, which is what reloading the screen did.
+    func retry() {
+        guard let failedPage else {
+            fetchInitialData()
+            return
+        }
+
+        errorMessage = nil
+        self.failedPage = nil
+        fetchEpisodes(page: failedPage)
     }
 
     private func fetchEpisodes(page: Int) {
@@ -77,6 +99,7 @@ class EpisodesListViewModel: ObservableObject {
 
                 guard !Task.isCancelled else { return }
 
+                failedPage = nil
                 hasMoreData = response.info.next != nil
 
                 if page == 1 {
@@ -90,6 +113,7 @@ class EpisodesListViewModel: ObservableObject {
                 // Superseded by a newer search or page request.
             } catch {
                 guard !Task.isCancelled else { return }
+                self.failedPage = page
                 self.errorMessage = error.localizedDescription
             }
         }
