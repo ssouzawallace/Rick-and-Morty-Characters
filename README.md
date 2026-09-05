@@ -2,6 +2,22 @@
 
 A native iOS app built with SwiftUI that browses the characters, locations and episodes of the [Rick and Morty API](https://rickandmortyapi.com), with no third-party dependencies.
 
+## Screenshots
+
+Using default theme:
+
+| List | Details |
+| --- | --- |
+| ![Characters list](docs/screenshots/characters-list.png) | ![Character details](docs/screenshots/character-details.png) |
+| ![Locations list](docs/screenshots/locations-list.png) | ![Location details](docs/screenshots/location-details.png) |
+| ![Episodes list](docs/screenshots/episodes-list.png) | ![Episode details](docs/screenshots/episode-details.png) |
+
+The background is a user preference. Any of eight can be picked from the gear button, and it applies to every screen:
+
+| Theme selector | New theme selected |
+| --- | --- |
+| ![Theme selector showing Deep Space selected](docs/screenshots/theme-selector.png) | ![The Characters list in the Blood Ridge theme](docs/screenshots/theme-blood-ridge.png) |
+
 ## What it does
 
 The app opens on a tab bar with three sections.
@@ -12,7 +28,7 @@ The app opens on a tab bar with three sections.
 
 **Episodes** — a paginated, searchable list of episodes. The detail view resolves the episode's character URLs and shows everyone who appears in it.
 
-The interface uses a custom dark palette defined in `GalacticTheme` — deep space blues with portal green, teal and purple accents.
+The interface uses a custom dark palette defined in `GalacticTheme` — portal green, teal and purple accents over a background the viewer chooses. `GalacticBackground` defines eight, all dark, and the choice is stored in `UserDefaults` and applied across every screen.
 
 Missing or empty API fields render as "Unknown" rather than blank space.
 
@@ -53,7 +69,6 @@ Rick and Morty Characters/
 
 ## Known gaps
 
-- Images load through `AsyncImage` with no caching or retry on failure
 - iPad runs the iPhone layout; no `NavigationSplitView` adaptation
 - Layouts are not tuned for landscape
 - Light appearance is not supported — the palette assumes dark
