@@ -26,6 +26,10 @@ struct MainTabView: View {
                     Label("Episodes", systemImage: "tv.fill")
                 }
         }
+        .tint(GalacticTheme.portalGreen)
+        // The palette is dark-only: in light mode UIKit draws navigation
+        // titles black, which is invisible against the galactic background.
+        .preferredColorScheme(.dark)
     }
 }
 
