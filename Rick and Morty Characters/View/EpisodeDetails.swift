@@ -16,49 +16,72 @@ struct EpisodeDetails: View {
     }
 
     var body: some View {
-        Group {
-            switch viewModel.status {
-            case .loading:
-                ProgressView()
-            case .loaded(episode: let episode):
-                List {
-                    Section {
-                        CharacterDetailsFormCell(key: "Name", value: episode.name)
-                        CharacterDetailsFormCell(key: "Episode", value: episode.episode)
-                        CharacterDetailsFormCell(key: "Air Date", value: episode.airDate)
-                    }
+        ZStack {
+            GalacticTheme.spaceBackground.ignoresSafeArea()
 
-                    Section {
-                        CharacterDetailsFormCell(key: "Characters", value: episode.characters.count.description)
-                        switch viewModel.charactersStatus {
-                        case .idle:
-                            EmptyView()
-                        case .loading:
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                Spacer()
-                            }
-                        case .loaded(let characters):
-                            ForEach(characters) { character in
-                                NavigationLink {
-                                    CharacterDetails(id: character.id)
-                                } label: {
-                                    CharactersListCell(character: character)
+            Group {
+                switch viewModel.status {
+                case .loading:
+                    GalacticLoadingView()
+
+                case .loaded(episode: let episode):
+                    List {
+                        Section {
+                            CharacterDetailsFormCell(key: "Name", value: episode.name)
+                            CharacterDetailsFormCell(key: "Episode", value: episode.episode)
+                            CharacterDetailsFormCell(key: "Air Date", value: episode.airDate)
+                        } header: {
+                            GalacticSectionHeader("Episode")
+                        }
+
+                        Section {
+                            CharacterDetailsFormCell(
+                                key: "Total Characters",
+                                value: episode.characters.count.description
+                            )
+
+                            switch viewModel.charactersStatus {
+                            case .idle:
+                                EmptyView()
+
+                            case .loading:
+                                HStack {
+                                    Spacer()
+                                    GalacticInlineSpinner()
+                                        .padding(.vertical, 12)
+                                    Spacer()
                                 }
-                                .buttonStyle(.plain)
+                                .listRowBackground(GalacticTheme.spaceBackground)
+                                .listRowSeparator(.hidden)
+
+                            case .loaded(let characters):
+                                ForEach(characters) { character in
+                                    NavigationLink {
+                                        CharacterDetails(id: character.id)
+                                    } label: {
+                                        CharactersListCell(character: character)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .galacticListRow()
+                                }
                             }
+                        } header: {
+                            GalacticSectionHeader("Characters")
                         }
                     }
-                }
-                .onAppear {
-                    if !episode.characters.isEmpty {
-                        viewModel.fetchCharacters(urls: episode.characters)
+                    .galacticList()
+                    .listStyle(.insetGrouped)
+                    .navigationLinkIndicatorVisibility(.hidden)
+                    .onAppear {
+                        if !episode.characters.isEmpty {
+                            viewModel.fetchCharacters(urls: episode.characters)
+                        }
                     }
                 }
             }
         }
         .navigationTitle("Episode")
+        .galacticNavigationBar()
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("Retry") {
                 viewModel.errorMessage = nil

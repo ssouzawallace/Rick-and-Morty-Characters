@@ -9,6 +9,11 @@ import SwiftUI
 
 @main
 struct Rick_and_Morty_CharactersApp: App {
+
+    init() {
+        GalacticAppearance.apply()
+    }
+
     var body: some Scene {
         WindowGroup {
             MainTabView()
