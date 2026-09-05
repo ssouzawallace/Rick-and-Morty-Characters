@@ -43,15 +43,6 @@ struct CharactersList: View {
                                             viewModel.fetchNextPage()
                                         }
                                     }
-                                } header: {
-                                    Picker("Search by Status", selection: $viewModel.searchScope) {
-                                        ForEach(CharacterStatus.allCases, id: \.self) { status in
-                                            Text(status == .undefined ? "All" : status.presentationValue)
-                                                .tag(status)
-                                        }
-                                    }
-                                    .pickerStyle(.segmented)
-                                    .padding(.vertical, 6)
                                 }
                                 .listRowBackground(background.color)
                             }
@@ -67,8 +58,20 @@ struct CharactersList: View {
             }
             .navigationTitle(Text("Characters"))
             .galacticNavigationBar()
-        .galacticSettingsToolbar()
+            .galacticSettingsToolbar()
             .searchable(text: $viewModel.searchText, prompt: Text("Search by name"))
+            // A real search scope bar rather than a Picker in the list: the system
+            // puts it under the search field, inside the navigation bar, and moves
+            // it with the field as it activates.
+            // .onSearchPresentation rather than the default: the scopes appear as
+            // soon as the field is focused, so the status filter is reachable
+            // without first typing a name.
+            .searchScopes($viewModel.searchScope, activation: .onSearchPresentation) {
+                ForEach(CharacterStatus.allCases, id: \.self) { status in
+                    Text(status == .undefined ? "All" : status.presentationValue)
+                        .tag(status)
+                }
+            }
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("Retry") {
                     viewModel.retry()
