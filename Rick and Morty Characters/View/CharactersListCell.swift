@@ -35,18 +35,21 @@ struct CharactersListCell: View {
 
             // Character portrait
             ZStack {
-                AsyncImage(url: URL(string: character.image)) { phase in
-                    if let image = phase.image {
+                CachedAsyncImage(
+                    url: URL(string: character.image),
+                    content: { image in
                         image.resizable().scaledToFill()
-                    } else if phase.error != nil {
-                        NoImageView()
-                    } else {
+                    },
+                    placeholder: {
                         ZStack {
                             GalacticTheme.cardBackground
                             GalacticInlineSpinner()
                         }
+                    },
+                    errorView: {
+                        NoImageView()
                     }
-                }
+                )
             }
             .frame(width: 100, height: 100)
             .clipShape(RoundedRectangle(cornerRadius: 10))

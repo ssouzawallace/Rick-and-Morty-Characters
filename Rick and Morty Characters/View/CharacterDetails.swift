@@ -27,8 +27,9 @@ struct CharacterDetails: View {
                     List {
                         // Portrait section
                         Section {
-                            AsyncImage(url: URL(string: character.image)) { phase in
-                                if let image = phase.image {
+                            CachedAsyncImage(
+                                url: URL(string: character.image),
+                                content: { image in
                                     image
                                         .resizable()
                                         .scaledToFit()
@@ -40,7 +41,16 @@ struct CharacterDetails: View {
                                         )
                                         .shadow(color: GalacticTheme.portalGreen.opacity(0.25), radius: 12)
                                         .padding(.vertical, 8)
-                                } else if phase.error != nil {
+                                },
+                                placeholder: {
+                                    HStack {
+                                        Spacer()
+                                        GalacticInlineSpinner(size: 40, lineWidth: 3)
+                                            .padding(.vertical, 40)
+                                        Spacer()
+                                    }
+                                },
+                                errorView: {
                                     HStack {
                                         Spacer()
                                         Image(systemName: "photo.slash")
@@ -48,15 +58,8 @@ struct CharacterDetails: View {
                                             .foregroundStyle(GalacticTheme.textSecondary)
                                         Spacer()
                                     }
-                                } else {
-                                    HStack {
-                                        Spacer()
-                                        GalacticInlineSpinner(size: 40, lineWidth: 3)
-                                            .padding(.vertical, 40)
-                                        Spacer()
-                                    }
                                 }
-                            }
+                            )
                             .listRowBackground(GalacticTheme.spaceBackground)
                         }
                         
