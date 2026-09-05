@@ -70,6 +70,13 @@ final class Rick_and_Morty_ImageCacheTests: XCTestCase {
         sut.store(image1, for: url)
         sut.store(image2, for: url)
 
-        XCTAssertNotNil(sut.image(for: url), "Cache should still contain an image after overwrite")
+        let cachedImage = sut.image(for: url)
+
+        XCTAssertNotNil(cachedImage, "Cache should still contain an image after overwrite")
+        XCTAssertEqual(
+            cachedImage?.pngData(),
+            image2.pngData(),
+            "Cache should return the most recently stored image after overwrite"
+        )
     }
 }

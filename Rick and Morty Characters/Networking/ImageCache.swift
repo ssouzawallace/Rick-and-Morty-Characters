@@ -25,9 +25,20 @@ final class ImageCache {
     }
 
     func store(_ image: UIImage, for url: URL) {
-        // Approximate decoded size in bytes; avoids re-encoding the image just to measure it.
-        let cost = image.cgImage.map { $0.bytesPerRow * $0.height } ?? 0
-        cache.setObject(image, forKey: url.absoluteString as NSString, cost: cost)
+        cache.setObject(image, forKey: url.absoluteString as NSString, cost: cacheCost(for: image))
+    }
+
+    /// Approximates the decoded size of `image` in bytes. Measuring by re-encoding
+    /// to JPEG would cost a compression pass on every store and returns nil for
+    /// images that cannot be encoded.
+    private func cacheCost(for image: UIImage) -> Int {
+        if let cgImage = image.cgImage {
+            return max(1, cgImage.bytesPerRow * cgImage.height)
+        }
+
+        let pixelWidth = Int(image.size.width * image.scale)
+        let pixelHeight = Int(image.size.height * image.scale)
+        return max(1, pixelWidth * pixelHeight * 4)
     }
 
     func removeImage(for url: URL) {
