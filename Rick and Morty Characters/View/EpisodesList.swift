@@ -13,52 +13,47 @@ struct EpisodesList: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                switch viewModel.status {
-                case .loading:
-                    ProgressView()
-                case .loaded(let episodes):
-                    if episodes.isEmpty {
-                        Text("No Results")
-                    } else {
-                        List {
-                            ForEach(episodes) { episode in
-                                NavigationLink {
-                                    EpisodeDetails(id: episode.id)
-                                } label: {
-                                    VStack(alignment: .leading) {
-                                        Text(episode.name)
-                                            .font(.headline)
-                                        Text(episode.episode)
-                                            .font(.subheadline)
-                                            .foregroundStyle(.secondary)
-                                        Text(episode.airDate)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
+            ZStack {
+                GalacticTheme.spaceBackground.ignoresSafeArea()
+
+                Group {
+                    switch viewModel.status {
+                    case .loading:
+                        GalacticLoadingView()
+
+                    case .loaded(let episodes):
+                        if episodes.isEmpty {
+                            GalacticEmptyState(systemImage: "tv.fill")
+                        } else {
+                            List {
+                                ForEach(episodes) { episode in
+                                    NavigationLink {
+                                        EpisodeDetails(id: episode.id)
+                                    } label: {
+                                        EpisodesListCell(episode: episode)
                                     }
-                                    .padding(.vertical, 4)
+                                    .buttonStyle(.plain)
+                                    .galacticListRow()
                                 }
-                                .buttonStyle(.plain)
-                            }
-                            if viewModel.hasMoreData {
-                                HStack {
-                                    Spacer()
-                                    ProgressView()
-                                    Spacer()
-                                }
-                                .onAppear {
-                                    viewModel.fetchNextPage()
+
+                                if viewModel.hasMoreData {
+                                    GalacticPagingFooter {
+                                        viewModel.fetchNextPage()
+                                    }
                                 }
                             }
-                        }
-                        .listStyle(.plain)
-                        .refreshable {
-                            viewModel.fetchInitialData()
+                            .galacticList()
+                            .listStyle(.plain)
+                            .navigationLinkIndicatorVisibility(.hidden)
+                            .refreshable {
+                                viewModel.fetchInitialData()
+                            }
                         }
                     }
                 }
             }
             .navigationTitle(Text("Episodes"))
+            .galacticNavigationBar()
             .searchable(text: $viewModel.searchText, prompt: Text("Search by name"))
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("Retry") {

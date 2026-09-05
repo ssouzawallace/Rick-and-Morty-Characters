@@ -81,10 +81,7 @@ struct CharacterDetails: View {
                             }
                             .listRowBackground(GalacticTheme.cardBackground)
                         } header: {
-                            Text("Identity")
-                                .font(.system(.caption, weight: .semibold))
-                                .foregroundStyle(GalacticTheme.portalTeal)
-                                .textCase(nil)
+                            GalacticSectionHeader("Identity")
                         }
                         
                         // Episodes section
@@ -112,23 +109,17 @@ struct CharacterDetails: View {
                                 .listRowBackground(GalacticTheme.cardBackground)
                             }
                         } header: {
-                            Text("Episodes")
-                                .font(.system(.caption, weight: .semibold))
-                                .foregroundStyle(GalacticTheme.portalTeal)
-                                .textCase(nil)
+                            GalacticSectionHeader("Episodes")
                         }
                     }
-                    .scrollContentBackground(.hidden)
-                    .background(GalacticTheme.spaceBackground)
+                    .galacticList()
                     .listStyle(.insetGrouped)
                 }
             }
         }
         .navigationTitle(Text("Character"))
+        .galacticNavigationBar()
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarColorScheme(.dark, for: .navigationBar)
-        .toolbarBackground(GalacticTheme.sectionHeader, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("Retry") {
                 viewModel.errorMessage = nil
