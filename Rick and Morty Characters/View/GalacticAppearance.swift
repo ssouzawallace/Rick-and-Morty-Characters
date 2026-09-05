@@ -22,9 +22,11 @@ enum GalacticAppearance {
 
     /// Transparent, so the galactic background runs edge to edge behind the title.
     private static func applyNavigationBar() {
+        // Only the text and tint here: the background is supplied per screen by
+        // galacticNavigationBar(), so it can follow the chosen theme and fade in
+        // on scroll. Pinning it transparent here would override that.
         let appearance = UINavigationBarAppearance()
         appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = .clear
         appearance.shadowColor = .clear
         appearance.titleTextAttributes = [
             .foregroundColor: UIColor(GalacticTheme.textPrimary)
@@ -34,9 +36,7 @@ enum GalacticAppearance {
         ]
 
         let navigationBar = UINavigationBar.appearance()
-        navigationBar.standardAppearance = appearance
         navigationBar.scrollEdgeAppearance = appearance
-        navigationBar.compactAppearance = appearance
         navigationBar.compactScrollEdgeAppearance = appearance
         navigationBar.tintColor = UIColor(GalacticTheme.portalGreen)
     }

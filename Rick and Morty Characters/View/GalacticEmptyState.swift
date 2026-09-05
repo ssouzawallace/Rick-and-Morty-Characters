@@ -69,11 +69,38 @@ extension View {
         modifier(GalacticListModifier())
     }
 
-    /// A transparent navigation bar over the galactic background.
+    /// A navigation bar that is clear at the top of a scroll and fades in over
+    /// content as the list moves under it.
     func galacticNavigationBar() -> some View {
-        self
+        modifier(GalacticNavigationBarModifier())
+    }
+}
+
+// MARK: - Navigation bar
+
+/// The bar was pinned transparent, which reads well at the top of a scroll and
+/// badly once rows pass under the title. Supplying a background style instead of
+/// hiding it lets the system keep its default behaviour: clear at the scroll
+/// edge, drawn once the content scrolls.
+///
+/// The style is a gradient rather than a flat fill — opaque under the status bar
+/// and title, fading to nothing at the bar's lower edge, so there is no hard seam
+/// where the bar ends and the list begins.
+private struct GalacticNavigationBarModifier: ViewModifier {
+
+    @GalacticBackgroundPreference private var background
+
+    func body(content: Content) -> some View {
+        content
             .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbarBackground(
+                LinearGradient(
+                    colors: [background.color, background.color.opacity(0)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                ),
+                for: .navigationBar
+            )
     }
 }
 
