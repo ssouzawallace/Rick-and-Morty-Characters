@@ -11,13 +11,15 @@ struct LocationDetails: View {
 
     @ObservedObject private var viewModel: LocationDetailsViewModel
 
+    @GalacticBackgroundPreference private var background
+
     init(id: Int) {
         viewModel = LocationDetailsViewModel(id: id)
     }
 
     var body: some View {
         ZStack {
-            GalacticTheme.spaceBackground.ignoresSafeArea()
+            background.color.ignoresSafeArea()
 
             Group {
                 switch viewModel.status {
@@ -34,6 +36,8 @@ struct LocationDetails: View {
                             GalacticSectionHeader("Location")
                         }
 
+                        // The count and the cards share one section, and one card
+                        // colour, so the whole group reads as a single panel.
                         Section {
                             CharacterDetailsFormCell(
                                 key: "Total Residents",
@@ -51,7 +55,7 @@ struct LocationDetails: View {
                                         .padding(.vertical, 12)
                                     Spacer()
                                 }
-                                .listRowBackground(GalacticTheme.spaceBackground)
+                                .listRowBackground(background.cardColor)
                                 .listRowSeparator(.hidden)
 
                             case .loaded(let characters):
@@ -62,7 +66,7 @@ struct LocationDetails: View {
                                         CharactersListCell(character: character)
                                     }
                                     .buttonStyle(.plain)
-                                    .galacticListRow()
+                                    .galacticListRow(onPanel: true)
                                 }
                             }
                         } header: {
@@ -82,9 +86,9 @@ struct LocationDetails: View {
         }
         .navigationTitle("Location")
         .galacticNavigationBar()
+        .galacticSettingsToolbar()
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("Retry") {
-                viewModel.errorMessage = nil
                 viewModel.retry()
             }
         } message: {

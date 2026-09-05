@@ -11,13 +11,15 @@ struct EpisodeDetails: View {
 
     @ObservedObject private var viewModel: EpisodeDetailsViewModel
 
+    @GalacticBackgroundPreference private var background
+
     init(id: Int) {
         viewModel = EpisodeDetailsViewModel(id: id)
     }
 
     var body: some View {
         ZStack {
-            GalacticTheme.spaceBackground.ignoresSafeArea()
+            background.color.ignoresSafeArea()
 
             Group {
                 switch viewModel.status {
@@ -34,6 +36,8 @@ struct EpisodeDetails: View {
                             GalacticSectionHeader("Episode")
                         }
 
+                        // The count and the cards share one section, and one card
+                        // colour, so the whole group reads as a single panel.
                         Section {
                             CharacterDetailsFormCell(
                                 key: "Total Characters",
@@ -51,7 +55,7 @@ struct EpisodeDetails: View {
                                         .padding(.vertical, 12)
                                     Spacer()
                                 }
-                                .listRowBackground(GalacticTheme.spaceBackground)
+                                .listRowBackground(background.cardColor)
                                 .listRowSeparator(.hidden)
 
                             case .loaded(let characters):
@@ -62,7 +66,7 @@ struct EpisodeDetails: View {
                                         CharactersListCell(character: character)
                                     }
                                     .buttonStyle(.plain)
-                                    .galacticListRow()
+                                    .galacticListRow(onPanel: true)
                                 }
                             }
                         } header: {
@@ -82,9 +86,9 @@ struct EpisodeDetails: View {
         }
         .navigationTitle("Episode")
         .galacticNavigationBar()
+        .galacticSettingsToolbar()
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("Retry") {
-                viewModel.errorMessage = nil
                 viewModel.retry()
             }
         } message: {

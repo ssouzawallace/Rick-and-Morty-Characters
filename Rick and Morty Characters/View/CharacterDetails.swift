@@ -11,13 +11,15 @@ struct CharacterDetails: View {
     
     @ObservedObject private var viewModel: CharactersDetailsViewModel
     
+    @GalacticBackgroundPreference private var background
+
     init(id: Int) {
         viewModel = CharactersDetailsViewModel(id: id)
     }
     
     var body: some View {
         ZStack {
-            GalacticTheme.spaceBackground.ignoresSafeArea()
+            background.color.ignoresSafeArea()
 
             Group {
                 switch viewModel.status {
@@ -60,7 +62,7 @@ struct CharacterDetails: View {
                                     }
                                 }
                             )
-                            .listRowBackground(GalacticTheme.spaceBackground)
+                            .listRowBackground(background.cardColor)
                         }
                         
                         // Identity section
@@ -79,7 +81,7 @@ struct CharacterDetails: View {
                                 Spacer()
                                 StatusBadge(status: character.status)
                             }
-                            .listRowBackground(GalacticTheme.cardBackground)
+                            .listRowBackground(background.cardColor)
                         } header: {
                             GalacticSectionHeader("Identity")
                         }
@@ -95,7 +97,7 @@ struct CharacterDetails: View {
                                     .font(.subheadline)
                                     .foregroundStyle(GalacticTheme.textSecondary)
                             }
-                            .listRowBackground(GalacticTheme.cardBackground)
+                            .listRowBackground(background.cardColor)
 
                             ForEach(character.episode, id: \.self) { episode in
                                 HStack(spacing: 8) {
@@ -106,7 +108,7 @@ struct CharacterDetails: View {
                                         .font(.system(.caption))
                                         .foregroundStyle(GalacticTheme.textSecondary)
                                 }
-                                .listRowBackground(GalacticTheme.cardBackground)
+                                .listRowBackground(background.cardColor)
                             }
                         } header: {
                             GalacticSectionHeader("Episodes")
@@ -119,10 +121,10 @@ struct CharacterDetails: View {
         }
         .navigationTitle(Text("Character"))
         .galacticNavigationBar()
+        .galacticSettingsToolbar()
         .navigationBarTitleDisplayMode(.inline)
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("Retry") {
-                viewModel.errorMessage = nil
                 viewModel.retry()
             }
         } message: {
