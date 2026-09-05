@@ -11,10 +11,12 @@ struct CharactersListCell: View {
 
     private struct NoImageView: View {
 
+        @GalacticBackgroundPreference private var background
+
         var body: some View {
             ZStack {
                 Rectangle()
-                    .fill(GalacticTheme.cardBackground)
+                    .fill(background.cardColor)
 
                 VStack(spacing: 6) {
                     Image(systemName: "photo.slash")
@@ -30,6 +32,8 @@ struct CharactersListCell: View {
 
     let character: Character
 
+    @GalacticBackgroundPreference private var background
+
     var body: some View {
         GalacticRowLayout {
             GalacticTile {
@@ -40,7 +44,7 @@ struct CharactersListCell: View {
                     },
                     placeholder: {
                         ZStack {
-                            GalacticTheme.cardBackground
+                            background.cardColor
                             GalacticInlineSpinner()
                         }
                     },
