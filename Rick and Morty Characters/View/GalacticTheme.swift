@@ -13,7 +13,6 @@ enum GalacticTheme {
 
     // Backgrounds
     static let spaceBackground  = Color(red: 0.039, green: 0.063, blue: 0.118)   // #0A1030
-    static let cardBackground   = Color(red: 0.102, green: 0.157, blue: 0.216)   // #1A2837
     static let sectionHeader    = Color(red: 0.055, green: 0.110, blue: 0.157)   // #0E1C28
 
     // Accent / Portal
@@ -40,34 +39,15 @@ enum GalacticTheme {
     }
 }
 
-// MARK: - Reusable view modifiers
-
-struct GalacticCardModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .background(GalacticTheme.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(GalacticTheme.portalGreen.opacity(0.35), lineWidth: 1)
-            )
-            .shadow(color: GalacticTheme.portalGreen.opacity(0.15), radius: 8, x: 0, y: 4)
-    }
-}
-
-extension View {
-    func galacticCard() -> some View {
-        modifier(GalacticCardModifier())
-    }
-}
-
 // MARK: - Galactic loading view (full-screen)
 
 struct GalacticLoadingView: View {
 
+    @GalacticBackgroundPreference private var background
+
     var body: some View {
         ZStack {
-            GalacticTheme.spaceBackground.ignoresSafeArea()
+            background.color.ignoresSafeArea()
 
             VStack(spacing: 20) {
                 GalacticInlineSpinner(size: 60, lineWidth: 4)

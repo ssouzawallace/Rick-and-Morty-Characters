@@ -10,11 +10,13 @@ import SwiftUI
 struct CharactersList: View {
     
     @ObservedObject var viewModel = CharactersListViewModel()
+
+    @GalacticBackgroundPreference private var background
     
     var body: some View {
         NavigationStack {
             ZStack {
-                GalacticTheme.spaceBackground.ignoresSafeArea()
+                background.color.ignoresSafeArea()
 
                 Group {
                     switch viewModel.status {
@@ -51,7 +53,7 @@ struct CharactersList: View {
                                     .pickerStyle(.segmented)
                                     .padding(.vertical, 6)
                                 }
-                                .listRowBackground(GalacticTheme.spaceBackground)
+                                .listRowBackground(background.color)
                             }
                             .galacticList()
                             .listStyle(.plain)
@@ -65,6 +67,7 @@ struct CharactersList: View {
             }
             .navigationTitle(Text("Characters"))
             .galacticNavigationBar()
+        .galacticSettingsToolbar()
             .searchable(text: $viewModel.searchText, prompt: Text("Search by name"))
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("Retry") {
