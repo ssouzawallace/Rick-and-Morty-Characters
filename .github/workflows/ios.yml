@@ -19,9 +19,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Show toolchain
-        run: xcodebuild -version
-
       # The runner image changes its simulator line-up over time, so pick
       # whichever iPhone is actually installed rather than pinning a name that
       # quietly disappears.
@@ -40,17 +37,9 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "Using $name"
 
-      - name: Build for testing
+      - name: Build and run unit tests
         run: |
-          xcodebuild build-for-testing \
-            -project "Rick and Morty Characters.xcodeproj" \
-            -scheme "Rick and Morty Characters" \
-            -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Run unit tests
-        run: |
-          xcodebuild test-without-building \
+          xcodebuild test \
             -project "Rick and Morty Characters.xcodeproj" \
             -scheme "Rick and Morty Characters" \
             -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
