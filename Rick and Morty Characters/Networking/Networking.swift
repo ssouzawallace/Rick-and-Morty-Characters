@@ -191,25 +191,48 @@ struct ApiService: Service {
 
     // MARK: Multiple Characters by URLs
 
+    /// A location can list dozens of residents. Without a cap, each one becomes a
+    /// simultaneous request: battery and network pressure, and a good way to get
+    /// throttled by the API.
+    private static let maxConcurrentCharacterRequests = 5
+
     func getCharactersByURLs(_ urls: [String]) async throws -> [Character] {
         try await withThrowingTaskGroup(of: Character.self) { group in
-            for urlString in urls {
-                group.addTask {
-                    guard let url = URL(string: urlString) else {
-                        throw NetworkingError.badUrl
-                    }
-                    let (data, response) = try await self.urlSession.data(from: url)
-                    if let response = response as? HTTPURLResponse, response.statusCode != 200 {
-                        throw NetworkingError.request(response.statusCode)
-                    }
-                    return try JSONDecoder().decode(Character.self, from: data)
+            var characters: [Character] = []
+            characters.reserveCapacity(urls.count)
+
+            var next = 0
+
+            // Prime the group, then top it up as each request finishes, so no more
+            // than maxConcurrentCharacterRequests are ever in flight.
+            while next < min(Self.maxConcurrentCharacterRequests, urls.count) {
+                let urlString = urls[next]
+                group.addTask { try await self.character(atURLString: urlString) }
+                next += 1
+            }
+
+            while let character = try await group.next() {
+                characters.append(character)
+
+                if next < urls.count {
+                    let urlString = urls[next]
+                    group.addTask { try await self.character(atURLString: urlString) }
+                    next += 1
                 }
             }
-            var characters: [Character] = []
-            for try await character in group {
-                characters.append(character)
-            }
+
             return characters.sorted { $0.id < $1.id }
         }
+    }
+
+    private func character(atURLString urlString: String) async throws -> Character {
+        guard let url = URL(string: urlString) else {
+            throw NetworkingError.badUrl
+        }
+        let (data, response) = try await urlSession.data(from: url)
+        if let response = response as? HTTPURLResponse, response.statusCode != 200 {
+            throw NetworkingError.request(response.statusCode)
+        }
+        return try JSONDecoder().decode(Character.self, from: data)
     }
 }
