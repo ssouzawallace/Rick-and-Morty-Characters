@@ -55,7 +55,26 @@ extension Character {
         self.url = try container.decode(String.self, forKey: .url)
         
         let createdString = try container.decode(String.self, forKey: .created)
-        self.created = ISO8601DateFormatter().date(from: createdString) ?? nil
+        self.created = Self.date(fromISO8601: createdString)
     }
+
+    // MARK: - Date parsing
+
+    /// The API sends fractional seconds ("2017-11-04T18:48:46.250Z"), which a
+    /// default `ISO8601DateFormatter` rejects — so `created` came back nil for
+    /// every character. Try with fractional seconds first, then without, so both
+    /// shapes parse and a genuinely malformed string still yields nil.
+    private static let fractionalSecondsFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    private static let internetDateTimeFormatter = ISO8601DateFormatter()
+
+    private static func date(fromISO8601 value: String) -> Date? {
+        fractionalSecondsFormatter.date(from: value) ?? internetDateTimeFormatter.date(from: value)
+    }
+
 }
 
