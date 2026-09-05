@@ -60,8 +60,7 @@ struct EpisodesList: View {
             .searchable(text: $viewModel.searchText, prompt: Text("Search by name"))
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("Retry") {
-                    viewModel.errorMessage = nil
-                    viewModel.fetchInitialData()
+                    viewModel.retry()
                 }
             } message: {
                 Text(viewModel.errorMessage ?? "")

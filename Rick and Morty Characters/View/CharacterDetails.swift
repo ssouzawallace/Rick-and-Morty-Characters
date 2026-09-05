@@ -125,7 +125,6 @@ struct CharacterDetails: View {
         .navigationBarTitleDisplayMode(.inline)
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("Retry") {
-                viewModel.errorMessage = nil
                 viewModel.retry()
             }
         } message: {
