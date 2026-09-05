@@ -47,6 +47,8 @@ class CharactersListViewModel: ObservableObject {
     private var page = 1
     
     private var cancellables = Set<AnyCancellable>()
+    
+    private var fetchTask: Task<Void, Never>?
 
     init(service: Service = ApiService()) {
         self.service = service
@@ -64,6 +66,8 @@ class CharactersListViewModel: ObservableObject {
     
     func fetchInitialData() {
         status = .loading
+        errorMessage = nil
+        hasMoreData = true
         page = 1
         fetchCharacters(page: currentPage)
     }
@@ -74,18 +78,27 @@ class CharactersListViewModel: ObservableObject {
     }
     
     private func fetchCharacters(page: Int) {
-        Task {
+        fetchTask?.cancel()
+        fetchTask = Task {
             do {
                 let response = try await service.listCharacters(page: page, name: searchText.isEmpty ? nil : searchText, status: searchScope == .undefined ? nil : searchScope.rawValue)
+                
+                guard !Task.isCancelled else { return }
+                
+                hasMoreData = response.info.next != nil
                 
                 if page == 1 {
                     self.status = .loaded(characters: response.results)
                 } else if case .loaded(characters: let previousData) = status {
-                    hasMoreData = response.info.next != nil
                     self.status = .loaded(characters: previousData + response.results)
                 }
                 
+            } catch is CancellationError {
+                // Superseded by a newer search or page request.
+            } catch let error as URLError where error.code == .cancelled {
+                // Superseded by a newer search or page request.
             } catch {
+                guard !Task.isCancelled else { return }
                 self.errorMessage = error.localizedDescription
             }
         }

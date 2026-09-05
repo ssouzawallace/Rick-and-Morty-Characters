@@ -40,6 +40,7 @@ class EpisodesListViewModel: ObservableObject {
     private let service: Service
     private var page = 1
     private var cancellables = Set<AnyCancellable>()
+    private var fetchTask: Task<Void, Never>?
 
     init(service: Service = ApiService()) {
         self.service = service
@@ -57,6 +58,8 @@ class EpisodesListViewModel: ObservableObject {
 
     func fetchInitialData() {
         status = .loading
+        errorMessage = nil
+        hasMoreData = true
         page = 1
         fetchEpisodes(page: currentPage)
     }
@@ -67,17 +70,26 @@ class EpisodesListViewModel: ObservableObject {
     }
 
     private func fetchEpisodes(page: Int) {
-        Task {
+        fetchTask?.cancel()
+        fetchTask = Task {
             do {
                 let response = try await service.listEpisodes(page: page, name: searchText.isEmpty ? nil : searchText)
+
+                guard !Task.isCancelled else { return }
+
+                hasMoreData = response.info.next != nil
 
                 if page == 1 {
                     self.status = .loaded(episodes: response.results)
                 } else if case .loaded(episodes: let previousData) = status {
-                    hasMoreData = response.info.next != nil
                     self.status = .loaded(episodes: previousData + response.results)
                 }
+            } catch is CancellationError {
+                // Superseded by a newer search or page request.
+            } catch let error as URLError where error.code == .cancelled {
+                // Superseded by a newer search or page request.
             } catch {
+                guard !Task.isCancelled else { return }
                 self.errorMessage = error.localizedDescription
             }
         }

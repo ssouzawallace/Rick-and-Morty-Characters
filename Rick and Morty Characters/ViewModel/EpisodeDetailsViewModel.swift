@@ -40,12 +40,16 @@ class EpisodeDetailsViewModel: ObservableObject {
 
     func fetchCharacters(urls: [String]) {
         guard case .idle = charactersStatus else { return }
+        errorMessage = nil
         charactersStatus = .loading
         Task {
             do {
                 let characters = try await service.getCharactersByURLs(urls)
                 self.charactersStatus = .loaded(characters: characters)
             } catch {
+                // Back to .idle so the guard above allows another attempt;
+                // leaving it .loading strands the view on a spinner forever.
+                self.charactersStatus = .idle
                 self.errorMessage = error.localizedDescription
             }
         }
