@@ -23,14 +23,7 @@ struct CharactersList: View {
 
                     case .loaded(let characters):
                         if characters.isEmpty {
-                            VStack(spacing: 16) {
-                                Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 44))
-                                    .foregroundStyle(GalacticTheme.portalGreen)
-                                Text("No Results")
-                                    .font(.title3)
-                                    .foregroundStyle(GalacticTheme.textSecondary)
-                            }
+                            GalacticEmptyState()
                         } else {
                             List {
                                 Section {
@@ -41,17 +34,10 @@ struct CharactersList: View {
                                             CharactersListCell(character: character)
                                         }
                                         .buttonStyle(.plain)
+                                        .galacticListRow()
                                     }
                                     if viewModel.hasMoreData {
-                                        HStack {
-                                            Spacer()
-                                            GalacticInlineSpinner(size: 28, lineWidth: 3)
-                                                .padding(.vertical, 12)
-                                            Spacer()
-                                        }
-                                        .listRowBackground(GalacticTheme.spaceBackground)
-                                        .listRowSeparator(.hidden)
-                                        .onAppear {
+                                        GalacticPagingFooter {
                                             viewModel.fetchNextPage()
                                         }
                                     }
@@ -67,8 +53,7 @@ struct CharactersList: View {
                                 }
                                 .listRowBackground(GalacticTheme.spaceBackground)
                             }
-                            .scrollContentBackground(.hidden)
-                            .background(GalacticTheme.spaceBackground)
+                            .galacticList()
                             .listStyle(.plain)
                             .navigationLinkIndicatorVisibility(.hidden)
                             .refreshable {
@@ -79,9 +64,7 @@ struct CharactersList: View {
                 }
             }
             .navigationTitle(Text("Characters"))
-            .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbarBackground(GalacticTheme.sectionHeader, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
+            .galacticNavigationBar()
             .searchable(text: $viewModel.searchText, prompt: Text("Search by name"))
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("Retry") {
