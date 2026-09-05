@@ -1,132 +1,64 @@
-# Rick and Morty Characters – SwiftUI App (REST API)
+# Rick and Morty Characters
 
-## Overview
-This is a native iOS application built with SwiftUI that displays characters from the Rick and Morty TV series. The app fetches data from the [Rick and Morty API](https://rickandmortyapi.com) and provides features to browse, search, and view detailed information about characters.
+A native iOS app built with SwiftUI that browses the characters, locations and episodes of the [Rick and Morty API](https://rickandmortyapi.com), with no third-party dependencies.
 
-## Setup
-No special requirements or third-party dependencies are needed to run this project.
+## What it does
 
-To get started:
-1. Open `Rick and Morty Characters.xcodeproj` in the root directory
-2. Select an iOS simulator of your choice
-3. Press Run to build and launch the app
+The app opens on a tab bar with three sections.
 
-## Architecture & Design Patterns
+**Characters** — a paginated list with pull-to-refresh. Search filters by name with a 250 ms debounce, and a scope bar filters by status (All, Alive, Dead, Unknown). Selecting a character opens a detail view showing its image, status, species, gender, origin, last known location and episode count.
 
-### MVVM Architecture
-The application follows the MVVM (Model-View-ViewModel) pattern, which provides clear separation of concerns:
-- **Models**: Data structures representing API responses and domain objects
-- **Views**: SwiftUI components responsible for UI rendering
-- **ViewModels**: Manage application state, handle business logic, and coordinate between views and services
+**Locations** — a paginated, searchable list of locations. The detail view lists the residents of each one.
 
-This architecture aligns well with SwiftUI's reactive programming model through the `@Published` property wrapper and `ObservableObject` protocol.
+**Episodes** — a paginated, searchable list of episodes. The detail view resolves the episode's character URLs and shows everyone who appears in it.
 
-### Project Structure
-The project is organized into four main folders:
+The interface uses a custom dark palette defined in `GalacticTheme` — deep space blues with portal green, teal and purple accents.
 
-- **Model**: Contains all data structures including API response models and domain models, plus enum definitions and protocol extensions for presentability
-- **Networking**: Contains the service layer with protocol definitions and the `ApiService` implementation for REST API communication
-- **View**: Contains SwiftUI components including the character list view and character detail view
-- **ViewModel**: Contains `ObservableObject` implementations that manage state and handle user interactions
+Missing or empty API fields render as "Unknown" rather than blank space.
 
-### Search and Filtering
-The search functionality uses two complementary approaches:
-- **Text Search**: A searchable modifier that filters characters by `name` field in real-time
-- **Status Filter**: A `searchScopes` modifier that allows filtering by character status (Alive, Dead, Unknown)
+## Requirements
 
-### Dependency Injection
-The networking layer uses protocol-based dependency injection to support testability:
-- Dependencies are declared as `Service` protocol with default implementations
-- This allows for easy mocking in unit tests and swapping implementations without modifying calling code
-- URL session is injected into `ApiService` for flexible configuration
+- Xcode with the iOS 17.6 SDK or later
+- Swift 5
+- Builds for iPhone and iPad
 
-### API Handling
-The application gracefully handles API responses:
-- Missing or empty data fields are populated with the placeholder text "Unknown"
-- Supports pagination for large datasets
-- Comprehensive error handling with user-facing error messages
+No package manager steps. The project uses only Foundation, SwiftUI and Combine.
 
-## Key Features
+## Build and run
 
-### 1. Character List View
-- Displays all characters in a scrollable list
-- Pagination support for efficient data loading
-- Pull-to-refresh functionality to reload data
-- Real-time search and filtering
+1. Open `Rick and Morty Characters.xcodeproj`
+2. Choose an iOS simulator
+3. Run
 
-### 2. Character Search & Filter
-- **Text Search**: Search characters by name with debounced input (250ms)
-- **Status Filter**: Filter by character status (All, Alive, Dead, Unknown)
-- Responsive filtering that updates the list in real-time
+## Architecture
 
-### 3. Character Details View
-- Displays comprehensive information about a selected character:
-  - Character name and image
-  - Status (Alive/Dead/Unknown)
-  - Species information
-  - Gender
-  - Origin location
-  - Last known location
-  - Episode count
+MVVM. Each screen has a `View` and an `ObservableObject` view model that publishes state through `@Published`.
 
-## Technical Implementation
+Networking sits behind a `Service` protocol implemented by `ApiService`, which wraps `URLSession` and uses async/await. `URLSession` is injected through the initialiser, so tests substitute a mock without touching call sites. Errors surface as typed `NetworkingError` values.
 
-### No Third-Party Dependencies
-The project uses only native Swift and SwiftUI frameworks to maintain simplicity and reduce external dependencies.
+```
+Rick and Morty Characters/
+├── App/          # App entry point
+├── Model/        # API response types, domain models, enums, extensions
+├── Networking/   # Service protocol, ApiService, NetworkingError
+├── View/         # SwiftUI screens, MainTabView, GalacticTheme
+└── ViewModel/    # ObservableObject state per screen
+```
 
-### Networking Layer
-- Built with `URLSession` for HTTP requests
-- Supports query parameters for pagination, name search, and status filtering
-- Implements proper error handling with custom `NetworkingError` types
-- Uses async/await for modern concurrency
+## Tests
 
-### State Management
-- `@Published` properties for reactive UI updates
-- `ObservableObject` protocol for view model reactivity
-- Combine framework for event-based programming
-- Debounced search input to reduce API calls
+`Rick and Morty CharactersTests` covers the service layer and view models. `MockURLProtocol` intercepts requests so response parsing and error paths are tested without network access. Tests are annotated `@MainActor`.
 
-### Data Persistence
-Missing or incomplete API data is handled gracefully by substituting "Unknown" as placeholder text, ensuring a consistent user experience.
+`Rick and Morty CharactersUITests` holds the XCUITest target with launch tests in place.
 
-## Testing
+## Known gaps
 
-The project includes comprehensive test coverage:
+- Images load through `AsyncImage` with no caching or retry on failure
+- iPad runs the iPhone layout; no `NavigationSplitView` adaptation
+- Layouts are not tuned for landscape
+- Light appearance is not supported — the palette assumes dark
+- UI test coverage is scaffolding rather than real workflow tests
 
-### Unit Tests (Target: `Rick and Morty CharactersTests`)
-- **Service Tests**: Verify API response parsing and network requests using `MockURLProtocol`
-- **ViewModel Tests**: Test state management, search filtering, and data transformations
+## A note on this repository
 
-### UI Tests (Target: `Rick and Morty CharactersUITests`)
-- Basic UI test framework in place for future expansion
-- UI testing infrastructure configured with XCTest
-
-Tests are written with the `@MainActor` attribute to ensure proper UI thread execution.
-
-## Future Enhancements
-
-### Testing Improvements
-- Expand unit test coverage with additional test cases and edge case scenarios
-- Implement comprehensive UI tests to validate user workflows and screen navigation
-- Add performance testing for large datasets
-
-### Image Loading & Caching
-- Implement automatic retry logic for failed image downloads using `AsyncImage`
-- Add image caching to improve performance and reduce network usage
-- Display placeholder or error state for missing character images
-
-### UI/UX Enhancements
-- Redesign the interface with a theme that matches Rick and Morty's aesthetic
-- Add custom colors, background patterns, and fonts to enhance visual appeal
-- Improve loading states and animations for better user feedback
-
-### Feature Expansion
-- Add **Locations Tab**: Browse and filter locations from the Rick and Morty universe
-- Add **Episodes Tab**: View episodes and their associated characters
-- Create tabbed navigation to allow easy switching between Characters, Locations, and Episodes
-- Implement cross-feature navigation (e.g., view all characters in an episode)
-
-### Platform Support
-- **iPad Support**: Implement a SplitView layout for improved iPad UX on the Character List/Details relationship
-- **Landscape Orientation**: Optimize layouts for both portrait and landscape modes
-- **Dark Mode**: Ensure full support for light and dark appearance modes
+`.github/instructions/` contains a file whose name includes an asterisk, which is not a legal filename on Windows. `git clone` fails at checkout there. Renaming it would make the repository cloneable on all platforms.
